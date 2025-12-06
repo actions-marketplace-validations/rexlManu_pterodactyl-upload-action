@@ -7,6 +7,10 @@ This GitHub Action allows you to upload files to multiple Pterodactyl servers wi
 
 ## Usage
 
+## Api Key
+
+You have to create a client api key in the pterodactyl panel. You can do this in the panel under `Account` -> `API Credentials`.
+
 ### Inputs
 
 1. `panel-host`: (**Required**) The host URL of the Pterodactyl panel.
@@ -17,6 +21,8 @@ This GitHub Action allows you to upload files to multiple Pterodactyl servers wi
 6. `sources`: Source files to be uploaded (multiline).
 7. `target`: Destination of the file on the server. Can be a file name (for a single source) or a directory name ending with a slash (for multiple files).
 8. `proxy`: Proxy to be used for upload (username:password@host:port).
+
+All file inputs support glob patterns.
 
 ### Example Workflow Configuration
 
@@ -29,7 +35,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
       - run: echo "Hello world" > hello.txt
-      - uses: rexlmanu/pterodactyl-upload-action@v1
+      - uses: rexlmanu/pterodactyl-upload-action@v2.1
         with:
           panel-host: ${{ secrets.PANEL_HOST }}
           api-key: ${{ secrets.API_KEY }}
@@ -42,7 +48,17 @@ jobs:
           #     hello.txt
           #     hello2.txt
           target: "./"
+          # If you want to restart the servers after successful upload
+          # restart: true
+          # If you want to decompress the files after successful upload
+          # decompress-target: true
 ```
+
+## File Decompression
+
+`decompress-target` allows decompression of archive files (`.zip, .tar, .tar.gz, .tgz, .rar`) after they are uploaded to the server. If you have multiple targets, it will decompress all valid compressed ones. If this option is not provided or set to false, files will be uploaded as is, without decompression.
+
+The archive will be deleted after decompression.
 
 ### Multiple File/Server Example
 
@@ -61,6 +77,19 @@ An optional `.pterodactyl-upload.json` file can be created in the root of your r
   "source": "hello.txt",
   "sources": ["hello.txt", "hello2.txt"],
   "target": "./"
+}
+```
+
+#### Multiple different targets
+
+If you need different targets for each file, you can provide a list of targets.
+
+```json
+{
+  "targets": {
+    "source": "hello.txt",
+    "target": "./"
+  }
 }
 ```
 
